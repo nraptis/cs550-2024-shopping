@@ -15,9 +15,22 @@ def main():
 
     # Load data from spreadsheet and split into train and test sets
     evidence, labels = load_data(sys.argv[1])
+
+    print("step?")
+    print("labels = ", labels)
+    print("evident = ", evidence)
+
+    print("labels size = ", len(labels))
+    for e in evidence:
+        print("evi size: ", len(e))
+        break
+
+    print("Will try split")
     X_train, X_test, y_train, y_test = train_test_split(
         evidence, labels, test_size=TEST_SIZE
     )
+    print("Did then split")
+
 
     # Train model and make predictions
     model = train_model(X_train, y_train)
@@ -38,29 +51,135 @@ def load_data(filename):
 
     evidence should be a list of lists, where each list contains the
     following values, in order:
-        - Administrative, an integer
-        - Administrative_Duration, a floating point number
-        - Informational, an integer
-        - Informational_Duration, a floating point number
-        - ProductRelated, an integer
-        - ProductRelated_Duration, a floating point number
-        - BounceRates, a floating point number
-        - ExitRates, a floating point number
-        - PageValues, a floating point number
-        - SpecialDay, a floating point number
-        - Month, an index from 0 (January) to 11 (December)
-        - OperatingSystems, an integer
-        - Browser, an integer
-        - Region, an integer
-        - TrafficType, an integer
-        - VisitorType, an integer 0 (not returning) or 1 (returning)
-        - Weekend, an integer 0 (if false) or 1 (if true)
-
+        
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    with open(filename) as file:
+        reader = csv.reader(file)
+        first_read = True
 
+        labels = []
+        evidence = []
+        for row in reader:
+            print("row = ", row)
+            if first_read:
+                first_read = False
+            else:
+
+                list = []
+                
+                #0,
+                #- Administrative, an integer
+                list.append(int(row[0]))
+               
+                #0,
+                #- Administrative_Duration, a floating point number
+                list.append(float(row[1]))
+
+                #0,
+                #- Informational, an integer
+                list.append(int(row[2]))
+
+                #0,
+                #- Informational_Duration, a floating point number
+                list.append(float(row[3]))
+
+                #1,
+                #- ProductRelated, an integer
+                list.append(int(row[4]))
+
+                #0,
+                #- ProductRelated_Duration, a floating point number
+                list.append(float(row[5]))
+
+                #0.2,
+                #- BounceRates, a floating point number
+                list.append(float(row[6]))
+                
+                #0.2,
+                #- ExitRates, a floating point number
+                list.append(float(row[7]))
+
+                #0,
+                #- PageValues, a floating point number
+                list.append(float(row[8]))
+
+                #0,
+                #- SpecialDay, a floating point number
+                list.append(float(row[9]))
+
+                #Feb,
+                #- Month, an index from 0 (January) to 11 (December)
+                month_string = row[10].lower()
+
+                if month_string == "jan":
+                    list.append(0)
+                elif month_string == "feb":
+                    list.append(1)
+                elif month_string == "mar":
+                    list.append(2)
+                elif month_string == "apr":
+                    list.append(3)
+                elif month_string == "may":
+                    list.append(4)
+                elif month_string == "june":
+                    list.append(5)
+                elif month_string == "jul":
+                    list.append(6)
+                elif month_string == "aug":
+                    list.append(7)
+                elif month_string == "sep":
+                    list.append(8)
+                elif month_string == "oct":
+                    list.append(9)
+                elif month_string == "nov":
+                    list.append(10)
+                else:
+                    list.append(11)
+
+                print("MON: ", month_string, "=>", list[-1])
+                
+
+                #1,
+                #- OperatingSystems, an integer
+                list.append(int(row[11]))
+
+                #1,
+                #- Browser, an integer
+                list.append(int(row[12]))
+
+                #1,
+                #- Region, an integer
+                list.append(int(row[13]))
+
+                #1,
+                #- TrafficType, an integer
+                list.append(int(row[14]))
+                
+                #Returning_Visitor,
+                #- VisitorType, an integer 0 (not returning) or 1 (returning)
+                returning = row[15].lower()
+                if returning == "returning_visitor":
+                    list.append(1)
+                else:
+                    list.append(0)
+                print("RV: ", returning)
+                
+                #FALSE,
+                #- Weekend, an integer 0 (if false) or 1 (if true)
+                weekend_str = row[16].strip().lower()
+                weekend = 1 if weekend_str == "true" else 0
+                
+                #FALSE
+                #Revenue
+                revenue_str = row[17].strip().lower()
+                label = 1 if revenue_str == "true" else 0
+
+                evidence.append(list)
+                labels.append(label)
+
+    return (evidence, labels)
 
 def train_model(evidence, labels):
     """
