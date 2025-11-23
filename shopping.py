@@ -15,22 +15,9 @@ def main():
 
     # Load data from spreadsheet and split into train and test sets
     evidence, labels = load_data(sys.argv[1])
-
-    print("step?")
-    print("labels = ", labels)
-    print("evident = ", evidence)
-
-    print("labels size = ", len(labels))
-    for e in evidence:
-        print("evi size: ", len(e))
-        break
-
-    print("Will try split")
     X_train, X_test, y_train, y_test = train_test_split(
         evidence, labels, test_size=TEST_SIZE
     )
-    print("Did then split")
-
 
     # Train model and make predictions
     model = train_model(X_train, y_train)
@@ -51,144 +38,143 @@ def load_data(filename):
 
     evidence should be a list of lists, where each list contains the
     following values, in order:
-        
+        - Administrative, an integer
+        - Administrative_Duration, a floating point number
+        - Informational, an integer
+        - Informational_Duration, a floating point number
+        - ProductRelated, an integer
+        - ProductRelated_Duration, a floating point number
+        - BounceRates, a floating point number
+        - ExitRates, a floating point number
+        - PageValues, a floating point number
+        - SpecialDay, a floating point number
+        - Month, an index from 0 (January) to 11 (December)
+        - OperatingSystems, an integer
+        - Browser, an integer
+        - Region, an integer
+        - TrafficType, an integer
+        - VisitorType, an integer 0 (not returning) or 1 (returning)
+        - Weekend, an integer 0 (if false) or 1 (if true)
+
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
+
+    evidence = list()
+    labels = []
+
+    # Month lookup table (Month → Number 0–11)
+    month_lut = {
+        "Jan": 0,
+        "Feb": 1,
+        "Mar": 2,
+        "Apr": 3,
+        "May": 4,
+        "June": 5,
+        "Jul": 6,
+        "Aug": 7,
+        "Sep": 8,
+        "Oct": 9,
+        "Nov": 10,
+        "Dec": 11
+    }
+
+    # Visitor Type lookup (string → 0 or 1)
+    visitor_lut = {
+        "Returning_Visitor": 1,
+        "New_Visitor": 0,
+        "Other": 0
+    }
+
+    # Boolean Type lookup (string → 0 or 1)
+    boolean_lut = {
+        "TRUE": 1,
+        "FALSE": 0
+    }
+
     with open(filename) as file:
         reader = csv.reader(file)
-        first_read = True
 
-        labels = []
-        evidence = []
+        # Skip the row of column names...
+        next(reader)
+
         for row in reader:
-            print("row = ", row)
-            if first_read:
-                first_read = False
-            else:
 
-                list = []
-                
-                #0,
-                #- Administrative, an integer
-                list.append(int(row[0]))
-               
-                #0,
-                #- Administrative_Duration, a floating point number
-                list.append(float(row[1]))
+            evidence_row = []
+            label = 0
 
-                #0,
-                #- Informational, an integer
-                list.append(int(row[2]))
+            # Administrative - Index 0, Integer
+            evidence_row.append(int(row[0]))
 
-                #0,
-                #- Informational_Duration, a floating point number
-                list.append(float(row[3]))
+            # Administrative_Duration - Index 1, Float
+            evidence_row.append(float(row[1]))
 
-                #1,
-                #- ProductRelated, an integer
-                list.append(int(row[4]))
+            # Informational - Index 2, Integer
+            evidence_row.append(int(row[2]))
 
-                #0,
-                #- ProductRelated_Duration, a floating point number
-                list.append(float(row[5]))
+            # Informational_Duration - Index 3, Float
+            evidence_row.append(float(row[3]))
 
-                #0.2,
-                #- BounceRates, a floating point number
-                list.append(float(row[6]))
-                
-                #0.2,
-                #- ExitRates, a floating point number
-                list.append(float(row[7]))
+            # ProductRelated - Index 4, Integer
+            evidence_row.append(int(row[4]))
 
-                #0,
-                #- PageValues, a floating point number
-                list.append(float(row[8]))
+            # ProductRelated_Duration - Index 5, Float
+            evidence_row.append(float(row[5]))
 
-                #0,
-                #- SpecialDay, a floating point number
-                list.append(float(row[9]))
+            # BounceRates - Index 6, Float
+            evidence_row.append(float(row[6]))
 
-                #Feb,
-                #- Month, an index from 0 (January) to 11 (December)
-                month_string = row[10].lower()
+            # ExitRates - Index 7, Float
+            evidence_row.append(float(row[7]))
 
-                if month_string == "jan":
-                    list.append(0)
-                elif month_string == "feb":
-                    list.append(1)
-                elif month_string == "mar":
-                    list.append(2)
-                elif month_string == "apr":
-                    list.append(3)
-                elif month_string == "may":
-                    list.append(4)
-                elif month_string == "june":
-                    list.append(5)
-                elif month_string == "jul":
-                    list.append(6)
-                elif month_string == "aug":
-                    list.append(7)
-                elif month_string == "sep":
-                    list.append(8)
-                elif month_string == "oct":
-                    list.append(9)
-                elif month_string == "nov":
-                    list.append(10)
-                else:
-                    list.append(11)
+            # PageValues - Index 8, Float
+            evidence_row.append(float(row[8]))
 
-                print("MON: ", month_string, "=>", list[-1])
-                
+            # SpecialDay - Index 9, Float
+            evidence_row.append(float(row[9]))
 
-                #1,
-                #- OperatingSystems, an integer
-                list.append(int(row[11]))
+            # Month - Index 10, String converted with month_lut
+            month = month_lut[row[10]]
+            evidence_row.append(month)
 
-                #1,
-                #- Browser, an integer
-                list.append(int(row[12]))
+            # OperatingSystems - Index 11, Integer
+            evidence_row.append(int(row[11]))
 
-                #1,
-                #- Region, an integer
-                list.append(int(row[13]))
+            # Browser - Index 12, Integer
+            evidence_row.append(int(row[12]))
 
-                #1,
-                #- TrafficType, an integer
-                list.append(int(row[14]))
-                
-                #Returning_Visitor,
-                #- VisitorType, an integer 0 (not returning) or 1 (returning)
-                returning = row[15].lower()
-                if returning == "returning_visitor":
-                    list.append(1)
-                else:
-                    list.append(0)
-                print("RV: ", returning)
-                
-                #FALSE,
-                #- Weekend, an integer 0 (if false) or 1 (if true)
-                weekend_str = row[16].strip().lower()
-                weekend = 1 if weekend_str == "true" else 0
-                
-                #FALSE
-                #Revenue
-                revenue_str = row[17].strip().lower()
-                label = 1 if revenue_str == "true" else 0
+            # Region - Index 13, Integer
+            evidence_row.append(int(row[13]))
 
-                evidence.append(list)
-                labels.append(label)
+            # TrafficType - Index 14, Integer
+            evidence_row.append(int(row[14]))
+
+            # VisitorType - Index 15, String converted with visitor_lut
+            visitor = visitor_lut[row[15]]
+            evidence_row.append(visitor)
+
+            # Weekend - Index 16, "TRUE"/"FALSE" → Integer 0/1
+            weekend = boolean_lut[row[16]]
+            evidence_row.append(weekend)
+
+            # Revenue - Index 17, "TRUE"/"FALSE" → label (0/1)
+            label = boolean_lut[row[17]]
+
+            evidence.append(evidence_row)
+            labels.append(label)
 
     return (evidence, labels)
+
 
 def train_model(evidence, labels):
     """
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    classifier = KNeighborsClassifier(n_neighbors=1)
-    classifier.fit(evidence, labels)
-    return classifier
+    model = KNeighborsClassifier(n_neighbors=1)
+    model.fit(evidence, labels)
+    return model
+
 
 def evaluate(labels, predictions):
     """
@@ -205,36 +191,35 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    print("labels = ", len(labels))
-    print("predictions = ", len(predictions))
 
     count = min(len(labels), len(predictions))
 
-    labels_positive = 0
-    labels_negative = 0
+    actual_positive_count = sum(
+        1 for i in range(count)
+        if labels[i]
+    )
 
-    predictions_true_positive = 0
-    predictions_true_negative = 0
-    
-    for index in range(count):
-        label = labels[index]
-        prediction = predictions[index]
-        if label == True:
-            labels_positive += 1
-            if prediction:
-                predictions_true_positive += 1
-        else:
-            labels_negative += 1
-            if not prediction:
-                predictions_true_negative += 1
-    
-    sensitivity = 1.0
-    specificity = 0.0
+    actual_negative_count = count - actual_positive_count
 
-    if labels_positive > 0:
-        sensitivity = predictions_true_positive / labels_positive
-    if labels_negative > 0:
-        specificity = predictions_true_negative / labels_negative
+    true_positives = sum(
+        1 for i in range(count)
+        if labels[i] and predictions[i]
+    )
+
+    true_negatives = sum(
+        1 for i in range(count)
+        if not labels[i] and not predictions[i]
+    )
+
+    # Correctly predicted positives / actual number of positives.
+    sensitivity = None
+    if actual_positive_count:
+        sensitivity = true_positives / actual_positive_count
+
+    # Correctly predicted negatives / actual number of negatives.
+    specificity = None
+    if actual_negative_count:
+        specificity = true_negatives / actual_negative_count
 
     return (sensitivity, specificity)
 
